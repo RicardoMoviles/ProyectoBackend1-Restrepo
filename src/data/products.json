@@ -1,0 +1,67 @@
+[
+     {
+          "id": 1,
+          "title": "Guitarra Eléctrica Fender Stratocaster",
+          "description": "Guitarra eléctrica de 6 cuerdas con pastillas de sencillo bobinado.",
+          "code": "GUITAR001",
+          "price": 1200,
+          "status": true,
+          "stock": 10,
+          "category": "Instrumentos",
+          "thumbnails": [
+               "http://example.com/guitarra_fender.jpg"
+          ]
+     },
+     {
+          "id": 2,
+          "title": "Amplificador de Guitarra",
+          "description": "Amplificador de 50 vatios con efecto de distorsión integrado.",
+          "code": "AMP001",
+          "price": 350,
+          "status": true,
+          "stock": 8,
+          "category": "Amplificadores",
+          "thumbnails": [
+               "http://example.com/amplificador.jpg"
+          ]
+     },
+     {
+          "id": 3,
+          "title": "Teclado MIDI",
+          "description": "Teclado MIDI de 49 teclas con conectividad USB.",
+          "code": "KEYBOARD001",
+          "price": 250,
+          "status": true,
+          "stock": 20,
+          "category": "Accesorios",
+          "thumbnails": [
+               "http://example.com/teclado_midi.jpg"
+          ]
+     },
+     {
+          "id": 4,
+          "title": "Micrófono de Estudio",
+          "description": "Micrófono de condensador con patrón polar cardioide.",
+          "code": "MIC001",
+          "price": 80,
+          "status": true,
+          "stock": 15,
+          "category": "Accesorios",
+          "thumbnails": [
+               "http://example.com/microfono_estudio.jpg"
+          ]
+     },
+     {
+          "id": 5,
+          "title": "Pedal de Efecto Overdrive",
+          "description": "Pedal de efecto de overdrive para guitarra eléctrica.",
+          "code": "PEDAL001",
+          "price": 90,
+          "status": true,
+          "stock": 12,
+          "category": "Accesorios",
+          "thumbnails": [
+               "http://example.com/pedal_overdrive.jpg"
+          ]
+     }
+]
