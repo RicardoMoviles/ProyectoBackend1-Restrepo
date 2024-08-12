@@ -61,8 +61,4 @@ class ProductsManager {
     }
 }
 
-
-
-
-
 module.exports = ProductsManager;
