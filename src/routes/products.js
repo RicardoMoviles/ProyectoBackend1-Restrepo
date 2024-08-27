@@ -14,7 +14,7 @@ router.get('/', async (req, res) => {
             return res.status(400).json({ error: `El argumento limit tiene que ser numerico` })
         }
         res.setHeader('Content-Type', 'application/json')
-        res.status(200).json({ resultado: products });
+        res.status(200).json({ products });
     } catch (error) {
         console.log(error);
         res.setHeader('Content-Type', 'application/json');
@@ -57,8 +57,8 @@ router.get('/:pid', async (req, res) => {
 router.post('/', async (req, res) => {
 
     const { title, description, code, price, status = true, stock, category, thumbnails = [] } = req.body;
-
     if (!title || !description || !code || !price || !stock || !category) {
+        
         return res.status(400).json({ error: 'Faltan campos obligatorios' });
     }
     let products = await ProductsManager.getProducts();
@@ -73,6 +73,7 @@ router.post('/', async (req, res) => {
     try {
         let preProducto = { title, description, code, price, status, stock, category, thumbnails }
         let productoNuevo = await ProductsManager.addProduct(preProducto)
+        req.io.emit("actualizarProductos", await ProductsManager.getProducts())
         res.setHeader('Content-Type', 'application/json');
         return res.status(200).json({ productoNuevo });
     } catch (error) {

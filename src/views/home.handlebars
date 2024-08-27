@@ -1,7 +1,10 @@
-{{>navbar}}
+{{> navbar}}
 <h2>{{titulo}}</h2>
-<h3>{{titulo2}}</h3>
 <hr>
 <br>
-{{>lista}}
+<ul id="productList">
+    <!-- Productos se mostrarán aquí -->
+</ul>
 <br>
+<script src="/socket.io/socket.io.js"></script>
+<script src="/js/home.js"></script>

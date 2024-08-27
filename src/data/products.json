@@ -1,19 +1,6 @@
 [
      {
           "id": 1,
-          "title": "Guitarra Eléctrica Fender Stratocaster",
-          "description": "Guitarra eléctrica de 6 cuerdas con pastillas de sencillo bobinado.",
-          "code": "GUITAR001",
-          "price": 1200,
-          "status": true,
-          "stock": 10,
-          "category": "Instrumentos",
-          "thumbnails": [
-               "http://example.com/guitarra_fender.jpg"
-          ]
-     },
-     {
-          "id": 2,
           "title": "Amplificador de Guitarra",
           "description": "Amplificador de 50 vatios con efecto de distorsión integrado.",
           "code": "AMP001",
@@ -26,7 +13,7 @@
           ]
      },
      {
-          "id": 3,
+          "id": 2,
           "title": "Teclado MIDI",
           "description": "Teclado MIDI de 49 teclas con conectividad USB.",
           "code": "KEYBOARD001",
@@ -39,7 +26,7 @@
           ]
      },
      {
-          "id": 4,
+          "id": 3,
           "title": "Micrófono de Estudio",
           "description": "Micrófono de condensador con patrón polar cardioide.",
           "code": "MIC001",
@@ -52,7 +39,7 @@
           ]
      },
      {
-          "id": 5,
+          "id": 4,
           "title": "Pedal de Efecto Overdrive",
           "description": "Pedal de efecto de overdrive para guitarra eléctrica.",
           "code": "PEDAL001",
@@ -63,5 +50,16 @@
           "thumbnails": [
                "http://example.com/pedal_overdrive.jpg"
           ]
+     },
+     {
+          "id": 5,
+          "title": "Bajo Eléctrico Gibson Thunderbird",
+          "description": "Bajo eléctrico con cuerpo de caoba y pastillas humbucker.",
+          "code": "BASS002",
+          "price": 300,
+          "status": true,
+          "stock": 4,
+          "category": "Instrumentos",
+          "thumbnails": []
      }
 ]
