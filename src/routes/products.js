@@ -6,15 +6,18 @@ router.get('/', async (req, res) => {
     try {
         const { limit } = req.query;
         let products = await ProductsManager.getProducts();
-        if (limit && !isNaN(limit)) {
-            products = products.slice(0, parseInt(limit));
+        if(limit){
+            if (!isNaN(limit)) {
+                products = products.slice(0, parseInt(limit));
+            }
+            else {
+                res.setHeader('Content-Type', 'application/json');
+                return res.status(400).json({ error: `El argumento limit tiene que ser numerico` })
+            }
         }
-        else {
-            res.setHeader('Content-Type', 'application/json');
-            return res.status(400).json({ error: `El argumento limit tiene que ser numerico` })
-        }
+        
         res.setHeader('Content-Type', 'application/json')
-        res.status(200).json({ products });
+        res.status(200).json(products);
     } catch (error) {
         console.log(error);
         res.setHeader('Content-Type', 'application/json');
