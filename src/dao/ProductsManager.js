@@ -1,16 +1,18 @@
 const fs = require('fs');
 const path = require('path');
+const productsModel = require('./models/productsModel');
 const productsFilePath = path.resolve('src/data/products.json');
 
 class ProductsManager {
     constructor() { }
 
     static async getProducts() {
-        if(fs.existsSync(productsFilePath)){
+        /* if(fs.existsSync(productsFilePath)){
             return JSON.parse(await fs.promises.readFile(productsFilePath, 'utf8'));
         }else{
             return []
-        }
+        } */
+        return productsModel.find();
     }
 
     static async addProduct(product = {}){

@@ -4,19 +4,17 @@ const {Server} = require("socket.io")
 const ProductsManager = require("./dao/ProductsManager.js");
 const http = require('http');
 const socketIo = require('socket.io');
+const connDB = require("./connDB.js");
+const config = require("./config/config.js");
 
 const app = express()
 const server = http.createServer(app)
 const io = socketIo(server);
-const PORT=8080
-
-
-
+const PORT=config.PORT
 
 const cartsRouter = require('./routes/carts.js');
 const productsRouter = require('./routes/products.js');
 const vistasRouter = require('./routes/vistasRouter.js');
-
 
 app.use(express.json());
 app.use(express.urlencoded({ extended:true }));
@@ -64,3 +62,5 @@ io.on('connection', (socket) => {
         }
     }); 
 });
+
+connDB()
