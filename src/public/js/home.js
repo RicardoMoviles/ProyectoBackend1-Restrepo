@@ -17,7 +17,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         products.forEach(product => {
             const li = document.createElement('li');
             li.textContent = `${product.title} - $${product.price}`;
-
             const deleteButton = document.createElement('button');
             deleteButton.textContent = 'Delete';
             deleteButton.onclick = () => {

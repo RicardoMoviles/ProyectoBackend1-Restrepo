@@ -74,12 +74,11 @@ router.post('/', async (req, res) => {
         
         return res.status(400).json({ error: 'Faltan campos obligatorios' });
     }
-    let products = await ProductsManager.getProducts();
-    let existe = products.find(p => p.code.toLowerCase() === code.toLowerCase())
+    let {payload} = await ProductsManager.getProducts();
+    let existe = payload.find(p => p.code.toLowerCase() == code.toLowerCase())
     if (existe) {
         res.setHeader('Content-Type', 'application/json');
         return res.status(400).json({ error: `Ya existe un producto con el codigo ${code}` })
-
     }
 
     // validar todo lo que se necesite...
