@@ -1,65 +1,105 @@
-const fs = require('fs');
-const path = require('path');
 const productsModel = require('./models/productsModel');
-const productsFilePath = path.resolve('src/data/products.json');
 
 class ProductsManager {
     constructor() { }
 
-    static async getProducts() {
-        /* if(fs.existsSync(productsFilePath)){
-            return JSON.parse(await fs.promises.readFile(productsFilePath, 'utf8'));
-        }else{
-            return []
-        } */
-        return productsModel.find();
+    static async getProducts(limit = 10, page = 1, query, sort) {
+        try {
+        const availability = true;  // Ejemplo de búsqueda por disponibilidad (productos disponibles)
+
+        // Construcción del filtro
+        const filter = {
+            $or: [
+                // Filtro por categoría, si hay una consulta
+                query
+                    ? {
+                        $expr: {
+                            $eq: [{ $toLower: "$category" }, query.toLowerCase()]
+                        }
+                    }
+                    : {},
+
+                // Filtro por disponibilidad
+                availability !== undefined
+                    ? { status: availability }
+                    : {}
+            ]
+        };
+
+        // Construcción del objeto de ordenamiento
+        const sorting = sort ? { price: sort === "asc" ? 1 : -1 } : {};
+
+        // Ejecución de la consulta con paginación
+        const response = await productsModel.paginate(filter, {
+            lean: true,
+            limit,
+            page,
+            sort: sorting
+        });
+
+
+        return {
+            status: response ? "success" : "error",
+            payload: response.docs,
+            totalPages: response.totalPages,
+            prevPage: response.prevPage,
+            nextPage: response.nextPage,
+            page: response.page,
+            hasPrevPage: response.hasPrevPage,
+            hasNextPage: response.hasNextPage,
+            prevLink: response.hasPrevPage
+                ? `/api/products?limit=${limit}&page=${response.prevPage}`
+                : null,
+            nextLink: response.hasNextPage
+                ? `/api/products?limit=${limit}&page=${response.nextPage}`
+                : null,
+        };
+        } catch (error) {
+            console.error("Error al obtener productos:", error);
+            throw new Error("No se pudieron obtener los productos.");
+        }
     }
 
-    static async addProduct(product = {}){
+    static async addProduct(product = {}) {
         let productos = await this.getProducts()
         let id = 1
         if (productos.length > 0) {
             id = Math.max(...productos.map(d => d.id)) + 1
         }
-
         let nuevoProducto = {
-            id, 
+            id,
             ...product,
         }
-
-        productos.push(nuevoProducto)
-        await fs.promises.writeFile(productsFilePath, JSON.stringify(productos, null, 5))
-        return nuevoProducto
+        try {
+            await productsModel.create(nuevoProducto);
+        } catch (error) {
+            console.error("Error al agregar el producto:", error);
+            throw new Error("No se pudo agregar el producto.");
+        }
     }
 
-    static async updateProduct(id, aModificar={}){
-        let productos=await this.getProducts()
-        let indiceProducto=productos.findIndex(p=>p.id===id)
-        if(indiceProducto===-1){
-            throw new Error(`Error: no existe id ${id}`)
+    static async updateProduct(id, aModificar = {}) {
+        try {
+            const result = await productsModel.findByIdAndUpdate(
+                id,
+                aModificar,
+                { new: true }
+            );
+            if (!result) throw new Error("Producto no encontrado para actualizar.");
+        } catch (error) {
+            console.error("Error al actualizar el producto:", error);
+            throw new Error("No se pudo actualizar el producto.");
         }
-        productos[indiceProducto]={
-            ...productos[indiceProducto],
-            ...aModificar,
-            id
-        }
-        await fs.promises.writeFile(productsFilePath, JSON.stringify(productos, null, 5))
-        return productos[indiceProducto]
     }
 
-    static async deleteProduct(id){
-        let productos=await this.getProducts()
-        let indiceProducto=productos.findIndex(h=>h.id===id)
-        if(indiceProducto===-1){
-            throw new Error(`Error: no existe id ${id}`)
+    static async deleteProduct(id) {
+        try {
+            const deletedProduct = await productsModel.findByIdAndDelete(id);
+            if (!deletedProduct) throw new Error("Producto no encontrado.");
+        } catch (error) {
+            console.error("Error al eliminar el producto:", error);
+            throw new Error("No se pudo eliminar el producto.");
         }
-        let cantidad0=productos.length
-        productos=productos.filter(h=>h.id!==id)   
-        let cantidad1=productos.length
-       
-        await fs.promises.writeFile(productsFilePath, JSON.stringify(productos, null, 5))
-
-        return cantidad0-cantidad1
     }
 }
 

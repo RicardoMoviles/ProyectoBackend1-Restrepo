@@ -3,10 +3,21 @@ const ProductsManager = require("../dao/productsManager");
 const router = Router()
 
 router.get('/', async (req, res) => {
+    const { limit, page, query, sort } = req.query;
+
+    const limitNumber = Number(limit);
+    const pageNumber = Number(page);
+
+    if (limit && isNaN(limitNumber)) {
+        return res.status(400).json({ error: "El límite debe ser un número válido" });
+    }
+    if (page && isNaN(pageNumber)) {
+        return res.status(400).json({ error: "La página debe ser un número válido" });
+    }
+
     try {
-        const { limit } = req.query;
-        let products = await ProductsManager.getProducts();
-        if(limit){
+        const products = await ProductsManager.getProducts(limitNumber || 10, pageNumber || 1, query, sort);
+        /* if(limit){
             if (!isNaN(limit)) {
                 products = products.slice(0, parseInt(limit));
             }
@@ -14,7 +25,7 @@ router.get('/', async (req, res) => {
                 res.setHeader('Content-Type', 'application/json');
                 return res.status(400).json({ error: `El argumento limit tiene que ser numerico` })
             }
-        }
+        } */
         
         res.setHeader('Content-Type', 'application/json')
         res.status(200).json(products);
@@ -34,9 +45,8 @@ router.get('/:pid', async (req, res) => {
 
     try {
         let { pid } = req.params
-        pid = Number(pid)
         let products = await ProductsManager.getProducts();
-        let product = products.find(p => p.id === pid)
+        let product = products.find(p => p._id == pid)
         if (!product) {
             res.setHeader('Content-Type', 'application/json');
             return res.status(404).json({ error: `Producto con id ${pid} no encontrado` })
@@ -92,24 +102,17 @@ router.post('/', async (req, res) => {
 });
 
 router.put('/:pid', async (req, res) => {
+    let { pid } = req.params
+    if(!isValidObjectId(pid)){
+        res.setHeader('Content-Type','application/json');
+        return res.status(400).json({error:`id invalido`})
+    }
     try {
-        let { pid } = req.params
-        pid = Number(pid)
-        
-        if (isNaN(pid)) {
-            // return res.send("id debe ser numerico")
-            res.setHeader('Content-Type', 'application/json');
-            return res.status(400).json({ error: `id debe ser numerico` })
+        const { title, description, code, price, status = true, stock, category, thumbnails = [] } = req.body;
+        if (!title || !description || !code || !price || !stock || !category) {
+            
+            return res.status(400).json({ error: 'Faltan campos obligatorios' });
         }
-
-        let products = await ProductsManager.getProducts();
-        let product = products.find(p => p.id === pid)
-
-        if (!product) {
-            res.setHeader('Content-Type', 'application/json');
-            return res.status(404).json({ error: `Producto con id ${pid} no encontrado` })
-        }
-
         let aModificar = req.body
         let productoModificado = await ProductsManager.updateProduct(pid, aModificar)
         res.setHeader('Content-Type', 'application/json');
@@ -128,25 +131,15 @@ router.put('/:pid', async (req, res) => {
 });
 
 router.delete('/:pid', async (req, res) => {
-    try {
-        let { pid } = req.params
-        pid = Number(pid)
-        
-        if (isNaN(pid)) {
-            // return res.send("id debe ser numerico")
-            res.setHeader('Content-Type', 'application/json');
-            return res.status(400).json({ error: `id debe ser numerico` })
-        }
+    let { pid } = req.params
+    if(!isValidObjectId(pid)){
+        res.setHeader('Content-Type','application/json');
+        return res.status(400).json({error:`id invalido`})
+    }
 
-        let resultado = await ProductsManager.deleteProduct(pid)
-        if (resultado > 0) {
-            res.setHeader('Content-Type', 'application/json');
-            return res.status(200).json({ payload: "Producto eliminado...!!!" });
-        } else {
-            res.setHeader('Content-Type', 'application/json');
-            return res.status(500).json({ error: `Error al eliminar... :(` })
-        }
-        
+    try {
+        await ProductsManager.deleteProduct(pid);
+        res.status(200).json({ mensaje: "Producto eliminado.", id: pid });        
     } catch (error) {
         console.log(error);
         res.setHeader('Content-Type','application/json');

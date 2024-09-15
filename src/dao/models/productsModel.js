@@ -1,7 +1,12 @@
 const mongoose = require('mongoose');
+const paginate = require("mongoose-paginate-v2");
 
 const productsColl="products"
 const productsSchema = new mongoose.Schema({
+    id: {
+        type: Number,
+        required: true,
+    },
     title: {
         type: String,
         required: true,
@@ -23,9 +28,9 @@ const productsSchema = new mongoose.Schema({
         min: [0, 'Price must be a positive number']
     },
     status: {
-        type: String,
-        enum: ['true', 'false'],
-        default: 'true'
+        type: Boolean,
+        enum: [true, false],
+        default: true
     },
     stock: {
         type: Number,
@@ -45,6 +50,9 @@ const productsSchema = new mongoose.Schema({
     timestamps: true,
     versionKey: false
 });
+
+// Plugin for pagination
+productsSchema.plugin(paginate)
 
 
 const productsModel=mongoose.model(

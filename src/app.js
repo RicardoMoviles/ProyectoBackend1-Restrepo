@@ -42,21 +42,10 @@ server.listen(PORT, ()=> {
 
 io.on('connection', (socket) => {
     console.log('cliente conectado');
-
-/*      socket.on('nuevoProducto', async (product) => {
-        try {
-            await ProductsManager.addProduct(product);
-            io.emit('actualizarProductos', await ProductsManager.getProducts());
-        } catch (error) {
-            console.error('Error adding product via WebSocket:', error.message);
-        }
-    }); */
+    
     socket.on('borrarProducto', async (productId) => {
         try {
-            const result = await ProductsManager.deleteProduct(productId);
-            if (result === 1) {
-                io.emit('updateProducts', await ProductsManager.getProducts());
-            }
+            await ProductsManager.deleteProduct(productId);
         } catch (error) {
             console.error('Error deleting product via WebSocket:', error.message);
         }
