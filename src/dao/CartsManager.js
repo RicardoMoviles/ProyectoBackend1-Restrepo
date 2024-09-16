@@ -4,6 +4,9 @@ const path = require('path');
 const cartsFilePath = path.resolve('src/data/carts.json');
 const ProductsManager = require("../dao/productsManager");
 
+const cartsModel = require('./models/cartsModel')
+const productsModel = require('./models/productsModel');
+
 class CartsManager{
     constructor(){}
 
