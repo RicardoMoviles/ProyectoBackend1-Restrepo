@@ -7,75 +7,69 @@ const ProductsManager = require("../dao/productsManager");
 const cartsModel = require('./models/cartsModel')
 const productsModel = require('./models/productsModel');
 
-class CartsManager{
-    constructor(){}
+class CartsManager {
+    constructor() { }
 
-    static async getCarts() {
+/*     static async getCarts() {
         if (fs.existsSync(cartsFilePath)) {
             return JSON.parse(await fs.promises.readFile(cartsFilePath, 'utf-8'));
         } else {
             return [];
         }
-    }
+    } */
 
     static async addCart() {
-        const carts = await this.getCarts();
-        let id = 1
-        if (carts.length > 0) {
-            id = Math.max(...carts.map(c => c.id)) + 1
+        try {
+            const newCart = { products: [] };
+            return await cartsModel.create(newCart);
+        } catch (error) {
+            console.error("Error al crear el carrito: ", error);
+            throw new Error("No se pudo agregar el carrito");
         }
-        const newCart = {
-            //id: uuidv4(), 
-            id,
-            products: []
-        };
-
-        carts.push(newCart);
-
-        await fs.promises.writeFile(cartsFilePath, JSON.stringify(carts, null, 5));
-
-        return newCart;
     }
 
     static async getCartProducts(cartId) {
         try {
-            const carts = await this.getCarts();
-            const cart = carts.find(c => c.id === cartId);
-
+            const cart = await cartsModel.findById(cartId).populate("products.product").lean();
             if (!cart) {
-                return null;
+                throw new Error("Carrito no encontrado.");
             }
-
-            return cart.products;
+            return cart;
         } catch (error) {
-            console.error('Error retrieving cart products:', error.message);
-            throw new Error('Error retrieving cart products');
+            console.error("Error al obtener los productos del carrito:", error);
+            throw new Error("Error al obtener los productos del carrito.");
         }
     }
 
     static async addProductToCart(cartId, productId) {
-        const carts = await this.getCarts();
-        const cart = carts.find(c => c.id === cartId);
-        if (!cart) {
+
+        const carts = await cartsModel.findOne({ _id: cartId }).lean();
+        if (!carts) {
             throw new Error(`Cart with id ${cartId} not found.`);
         }
-    
-        const products = await ProductsManager.getProducts();
-        const product = products.find(p => p.id === productId);
+
+        const product = await productsModel.findOne({ _id: productId }).lean();
         if (!product) {
-            throw new Error(`Product with id ${productId} not found.`);
+            throw new Error("Producto no encontrado.");
         }
-    
-        const productIndex = cart.products.findIndex(p => p.product === productId);
-        if (productIndex === -1) {
-            cart.products.push({ product: productId, quantity: 1 });
+
+        // Verifica si el producto ya está en el carrito
+        const productIndex = await cartsModel.findOne({
+            _id: cartId,
+            "products.product": productId,
+        }).lean();
+
+        if (productIndex) {
+            return await cartsModel.updateOne(
+                { _id: cartId, "products.product": productId },
+                { $inc: { "products.$.quantity": 1 } }
+            );
         } else {
-            cart.products[productIndex].quantity += 1;
+            return await cartsModel.updateOne(
+                { _id: cartId },
+                { $push: { products: { product: productId, quantity: 1 } } }
+            );
         }
-    
-        await fs.promises.writeFile(cartsFilePath, JSON.stringify(carts, null, 5));
-    
-        return cart.products;
     }
 }
 

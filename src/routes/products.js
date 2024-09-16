@@ -1,6 +1,7 @@
 const { Router } = require("express");
 const ProductsManager = require("../dao/productsManager");
 const router = Router()
+const { isValidObjectId } = require("mongoose");
 
 router.get('/', async (req, res) => {
     const { limit, page, query, sort } = req.query;
@@ -26,7 +27,7 @@ router.get('/', async (req, res) => {
                 return res.status(400).json({ error: `El argumento limit tiene que ser numerico` })
             }
         } */
-        
+
         res.setHeader('Content-Type', 'application/json')
         res.status(200).json(products);
     } catch (error) {
@@ -45,15 +46,12 @@ router.get('/:pid', async (req, res) => {
 
     try {
         let { pid } = req.params
-        let products = await ProductsManager.getProducts();
-        let product = products.find(p => p._id == pid)
+        const product = await ProductsManager.getProductsById(pid);
         if (!product) {
-            res.setHeader('Content-Type', 'application/json');
-            return res.status(404).json({ error: `Producto con id ${pid} no encontrado` })
+            return res.status(404).json({ error: "Producto no encontrado" });
         }
-
         res.setHeader('Content-Type', 'application/json');
-        res.status(200).json({ resultado: product });
+        res.status(200).json(product);
 
     } catch (error) {
         console.log(error);
@@ -71,11 +69,11 @@ router.post('/', async (req, res) => {
 
     const { title, description, code, price, status = true, stock, category, thumbnails = [] } = req.body;
     if (!title || !description || !code || !price || !stock || !category) {
-        
+
         return res.status(400).json({ error: 'Faltan campos obligatorios' });
     }
-    let {payload} = await ProductsManager.getProducts();
-    let existe = payload.find(p => p.code.toLowerCase() == code.toLowerCase())
+
+    let existe = await ProductsManager.getProductBy({ code })
     if (existe) {
         res.setHeader('Content-Type', 'application/json');
         return res.status(400).json({ error: `Ya existe un producto con el codigo ${code}` })
@@ -102,28 +100,28 @@ router.post('/', async (req, res) => {
 
 router.put('/:pid', async (req, res) => {
     let { pid } = req.params
-    if(!isValidObjectId(pid)){
-        res.setHeader('Content-Type','application/json');
-        return res.status(400).json({error:`id invalido`})
+    if (!isValidObjectId(pid)) {
+        res.setHeader('Content-Type', 'application/json');
+        return res.status(400).json({ error: `id invalido` })
     }
     try {
-        const { title, description, code, price, status = true, stock, category, thumbnails = [] } = req.body;
-        if (!title || !description || !code || !price || !stock || !category) {
-            
-            return res.status(400).json({ error: 'Faltan campos obligatorios' });
+        let aModificar = { ...req.body };
+
+        // Eliminar el campo _id si está presente en aModificar
+        if (aModificar._id) {
+            delete aModificar._id;
         }
-        let aModificar = req.body
         let productoModificado = await ProductsManager.updateProduct(pid, aModificar)
         res.setHeader('Content-Type', 'application/json');
         return res.status(200).json({ productoModificado });
 
     } catch (error) {
         console.log(error);
-        res.setHeader('Content-Type','application/json');
+        res.setHeader('Content-Type', 'application/json');
         return res.status(500).json(
             {
-                error:`Error inesperado en el servidor - Intente más tarde, o contacte a su administrador`,
-                detalle:`${error.message}`
+                error: `Error inesperado en el servidor - Intente más tarde, o contacte a su administrador`,
+                detalle: `${error.message}`
             }
         )
     }
@@ -131,23 +129,23 @@ router.put('/:pid', async (req, res) => {
 
 router.delete('/:pid', async (req, res) => {
     let { pid } = req.params
-    if(!isValidObjectId(pid)){
-        res.setHeader('Content-Type','application/json');
-        return res.status(400).json({error:`id invalido`})
+    if (!isValidObjectId(pid)) {
+        res.setHeader('Content-Type', 'application/json');
+        return res.status(400).json({ error: `id invalido` })
     }
 
     try {
         await ProductsManager.deleteProduct(pid);
-        res.status(200).json({ mensaje: "Producto eliminado.", id: pid });        
+        res.status(200).json({ mensaje: "Producto eliminado.", id: pid });
     } catch (error) {
         console.log(error);
-        res.setHeader('Content-Type','application/json');
+        res.setHeader('Content-Type', 'application/json');
         return res.status(500).json(
             {
-                error:`Error inesperado en el servidor - Intente más tarde, o contacte a su administrador`,
-                detalle:`${error.message}`
+                error: `Error inesperado en el servidor - Intente más tarde, o contacte a su administrador`,
+                detalle: `${error.message}`
             }
-        )    
+        )
     }
 });
 

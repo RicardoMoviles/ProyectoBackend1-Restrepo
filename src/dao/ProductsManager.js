@@ -5,71 +5,78 @@ class ProductsManager {
 
     static async getProducts(limit = 10, page = 1, query, sort) {
         try {
-        const availability = true;  // Ejemplo de búsqueda por disponibilidad (productos disponibles)
+            const availability = true;  // Ejemplo de búsqueda por disponibilidad (productos disponibles)
 
-        // Construcción del filtro
-        const filter = {
-            $or: [
-                // Filtro por categoría, si hay una consulta
-                query
-                    ? {
-                        $expr: {
-                            $eq: [{ $toLower: "$category" }, query.toLowerCase()]
+            // Construcción del filtro
+            const filter = {
+                $or: [
+                    // Filtro por categoría, si hay una consulta
+                    query
+                        ? {
+                            $expr: {
+                                $eq: [{ $toLower: "$category" }, query.toLowerCase()]
+                            }
                         }
-                    }
-                    : {},
+                        : {},
 
-                // Filtro por disponibilidad
-                availability !== undefined
-                    ? { status: availability }
-                    : {}
-            ]
-        };
+                    // Filtro por disponibilidad
+                    availability !== undefined
+                        ? { status: availability }
+                        : {}
+                ]
+            };
 
-        // Construcción del objeto de ordenamiento
-        const sorting = sort ? { price: sort === "asc" ? 1 : -1 } : {};
+            // Construcción del objeto de ordenamiento
+            const sorting = sort ? { price: sort === "asc" ? 1 : -1 } : {};
 
-        // Ejecución de la consulta con paginación
-        const response = await productsModel.paginate(filter, {
-            lean: true,
-            limit,
-            page,
-            sort: sorting
-        });
+            // Ejecución de la consulta con paginación
+            const response = await productsModel.paginate(filter, {
+                lean: true,
+                limit,
+                page,
+                sort: sorting
+            });
 
 
-        return {
-            status: response ? "success" : "error",
-            payload: response.docs,
-            totalPages: response.totalPages,
-            prevPage: response.prevPage,
-            nextPage: response.nextPage,
-            page: response.page,
-            hasPrevPage: response.hasPrevPage,
-            hasNextPage: response.hasNextPage,
-            prevLink: response.hasPrevPage
-                ? `/api/products?limit=${limit}&page=${response.prevPage}`
-                : null,
-            nextLink: response.hasNextPage
-                ? `/api/products?limit=${limit}&page=${response.nextPage}`
-                : null,
-        };
+            return {
+                status: response ? "success" : "error",
+                payload: response.docs,
+                totalPages: response.totalPages,
+                prevPage: response.prevPage,
+                nextPage: response.nextPage,
+                page: response.page,
+                hasPrevPage: response.hasPrevPage,
+                hasNextPage: response.hasNextPage,
+                prevLink: response.hasPrevPage
+                    ? `/api/products?limit=${limit}&page=${response.prevPage}`
+                    : null,
+                nextLink: response.hasNextPage
+                    ? `/api/products?limit=${limit}&page=${response.nextPage}`
+                    : null,
+            };
         } catch (error) {
             console.error("Error al obtener productos:", error);
             throw new Error("No se pudieron obtener los productos.");
         }
     }
 
-    static async addProduct(product = {}) {
-        let productos = await this.getProducts()
-        let id = 1
-        if (productos.length > 0) {
-            id = Math.max(...productos.map(d => d.id)) + 1
+    // Obtener un producto por su ID
+    static async getProductsById(productId) {
+        try {
+            const product = await productsModel.findOne({ _id: productId }).lean();
+            if (!product) throw new Error("Producto no encontrado.");
+            return product;
+        } catch (error) {
+            console.error("Error al obtener el producto:", error);
+            throw new Error("Error al obtener el producto por ID.");
         }
-        let nuevoProducto = {
-            id,
-            ...product,
-        }
+    }
+
+    static async getProductBy(filtro={}){  
+        return await productsModel.findOne(filtro)
+    }
+
+    static async addProduct(nuevoProducto) {
         try {
             await productsModel.create(nuevoProducto);
         } catch (error) {
@@ -78,7 +85,11 @@ class ProductsManager {
         }
     }
 
-    static async updateProduct(id, aModificar = {}) {
+    static async updateProduct(id, aModificar) {
+        // Asegúrate de que _id no esté en los datos a modificar
+        if (aModificar._id) {
+            throw new Error('No se puede modificar el campo _id');
+        }
         try {
             const result = await productsModel.findByIdAndUpdate(
                 id,
@@ -86,6 +97,7 @@ class ProductsManager {
                 { new: true }
             );
             if (!result) throw new Error("Producto no encontrado para actualizar.");
+            return result;
         } catch (error) {
             console.error("Error al actualizar el producto:", error);
             throw new Error("No se pudo actualizar el producto.");
