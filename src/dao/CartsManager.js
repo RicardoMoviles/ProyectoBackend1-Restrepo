@@ -71,6 +71,55 @@ class CartsManager {
             );
         }
     }
+
+    static async deleteProductFromCart(cartId, productId) {
+        try {
+            return await cartsModel.updateOne(
+                { _id: cartId },
+                { $pull: { products: { product: productId } } }
+            );
+        } catch (error) {
+            console.error("Error al eliminar producto del carrito:", error);
+            throw new Error("Error al eliminar producto del carrito.");
+        }
+    }
+
+    
+    static async deleteAllProducts(cartId) {
+        try {
+            return await cartsModel.updateOne(
+                { _id: cartId },
+                { $set: { products: [] } }
+            );
+        } catch (error) {
+            console.error("Error al eliminar todos los productos del carrito:", error);
+            throw new Error("Error al eliminar todos los productos del carrito.");
+        }
+    }
+
+    static async updateProductQuantity(cartId, productId, quantity) {
+        try {
+            return await cartsModel.updateOne(
+                { _id: cartId, "products.product": productId },
+                { $set: { "products.$.quantity": quantity } }
+            );
+        } catch (error) {
+            console.error("Error al actualizar la cantidad del producto en el carrito:", error);
+            throw new Error("Error al actualizar la cantidad del producto en el carrito.");
+        }
+    }
+
+    static async updateAllCart(cartId, products) {
+        try {
+            await cartsModel.updateOne(
+                { _id: cartId },
+                { $set: { products } }
+            );
+        } catch (error) {
+            console.error("Error al actualizar el carrito:", error);
+            throw new Error("Error al actualizar el carrito.");
+        }
+    }
 }
 
 module.exports = CartsManager;
