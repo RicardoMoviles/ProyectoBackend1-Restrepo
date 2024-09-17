@@ -1,12 +1,38 @@
 const Router = require('express').Router;
 const ProductsManager = require("../dao/productsManager");
+const CartsManager  = require ("../dao/CartsManager");
 const router = Router()
 
 
+// Renderizar la vista del carrito
+router.get("/cart", async (req, res) => {
+    const cartId = "66e79f9222db5c70e4712aba";  // Este ID debería ser dinámico en un caso real
+    try {
+        const cartProducts = await CartsManager.getCartProducts(cartId);
+
+        if (!cartProducts || !cartProducts.products) {
+            return res.status(404).render("error", { error: "Carrito no encontrado" });
+        }
+
+        res.status(200).render("cart", {
+            title: "Cart",
+            products: cartProducts.products,
+        });
+    } catch (error) {
+        console.error("Error al cargar el carrito:", error);
+        res.status(500).json({
+            error: "Error en el servidor",
+            detalle: error.message,
+        });
+    }
+});
+
+
 router.get('/', async (req, res) => {
+    const cartId = "66e79f9222db5c70e4712aba";  // Este ID debería ser dinámico en un caso real
     try {
         const products = await ProductsManager.getProducts();
-        //const cart = await CartsManager.getCartProducts(cartId);
+        const cart = await CartsManager.getCartProducts(cartId);
 
         if (!products || !products.payload) {
             return res.status(404).render("error", { error: "Productos o carrito no encontrado" });
@@ -19,7 +45,8 @@ router.get('/', async (req, res) => {
             title: "Home",
             products: products.payload,
             page: products.page || 1,
-            totalPages: products.totalPages || 1
+            totalPages: products.totalPages || 1,
+            numCarts: cart.products.length || 0
         });
     } catch (error) {
         console.log(error);

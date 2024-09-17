@@ -19,14 +19,23 @@ document.addEventListener('DOMContentLoaded', async () => {
             li.textContent = `${product.title} - $${product.price}`;
             const deleteButton = document.createElement('button');
             deleteButton.textContent = 'Delete';
+            const addToCart = document.createElement('button');
+            addToCart.textContent = 'AddCart';
             deleteButton.onclick = () => {
                 // Eliminar el elemento `li` del DOM
                 list.removeChild(li);
                 // Emitir el evento para borrar el producto en el servidor
                 socket.emit('borrarProducto', product._id);
             };
+            addToCart.onclick = () => {
+                // Eliminar el elemento `li` del DOM
+                list.removeChild(li);
+                // Emitir el evento para borrar el producto en el servidor
+                socket.emit('agregarProductoAlCarrito', product._id);
+            };
 
             li.appendChild(deleteButton);
+            li.appendChild(addToCart);
             list.appendChild(li);
         });
     };
