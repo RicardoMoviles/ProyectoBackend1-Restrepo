@@ -61,7 +61,9 @@ router.get('/', async (req, res) => {
 })
 
 router.get('/realtimeproducts', async (req, res) => {
+    const cartId = "66e79f9222db5c70e4712aba";  // Este ID debería ser dinámico en un caso real
     let products;
+    const cart = await CartsManager.getCartProducts(cartId);
     try {
         products = await ProductsManager.getProducts();
     } catch (error) {
@@ -78,7 +80,8 @@ router.get('/realtimeproducts', async (req, res) => {
     res.setHeader('Content-Type', 'text/html')
     res.status(200).render("realTimeProducts", {
         realEstilo: "real-styles",
-        products: products
+        products: products,
+        numCarts: cart.products.length || 0
     })
 })
 

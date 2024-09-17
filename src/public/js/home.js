@@ -28,14 +28,12 @@ document.addEventListener('DOMContentLoaded', async () => {
                 socket.emit('borrarProducto', product._id);
             };
             addToCart.onclick = () => {
-                // Eliminar el elemento `li` del DOM
-                list.removeChild(li);
-                // Emitir el evento para borrar el producto en el servidor
+                // Emitir el evento para agregar el producto al carrito en el servidor
                 socket.emit('agregarProductoAlCarrito', product._id);
             };
 
-            li.appendChild(deleteButton);
             li.appendChild(addToCart);
+            li.appendChild(deleteButton);
             list.appendChild(li);
         });
     };
@@ -50,7 +48,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Función para obtener productos
     const fetchProducts = async () => {
         try {
-            const response = await fetch(`/api/products?page=${page}`); // Solicitud GET con número de página
+            const response = await fetch(`/api/products/?page=${page}`); // Solicitud GET con número de página
             if (response.ok) {
                 const data = await response.json();
                 maxPage = data.totalPages; // Asegúrate de que tu backend envíe 'totalPages'
@@ -70,7 +68,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     await fetchProducts();
 
     socket.on('actualizarProductos', (products) => {
-        renderProducts(products);
+        //renderProducts(products);
+        fetchProducts()
     });
 
     // Redireccionar a la siguiente página
