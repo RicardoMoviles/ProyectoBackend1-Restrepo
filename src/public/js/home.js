@@ -16,7 +16,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         list.innerHTML = ''; // Vaciar la lista actual
         products.forEach(product => {
             const li = document.createElement('li');
-            li.textContent = `${product.title} - $${product.price}`;
+            // Crear un contenedor para el texto
+            const textContainer = document.createElement('span');
+            textContainer.textContent = `${product.title} - $${product.price}`;
             const deleteButton = document.createElement('button');
             deleteButton.textContent = 'Delete';
             const addToCart = document.createElement('button');
@@ -32,6 +34,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 socket.emit('agregarProductoAlCarrito', product._id);
             };
 
+            li.appendChild(textContainer); // Añadir el contenedor de texto al li
             li.appendChild(addToCart);
             li.appendChild(deleteButton);
             list.appendChild(li);
